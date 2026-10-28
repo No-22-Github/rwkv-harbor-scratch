@@ -1,0 +1,54 @@
+# RWKV (rwkv_lightning_cuda) + terminus-2 跑 hello-world
+#
+# 用法（在 RWKV-Harbor-Test 根目录）：
+#   export RWKV_API_BASE=http://<host>:8000/v1
+#   OPENAI_BASE_URL=$RWKV_API_BASE OPENAI_API_KEY=dummy \
+#     uv run --project harbor harbor run -c configs/rwkv-hello-world.yaml
+#
+# 端点说明见 https://github.com/Alic-Li/rwkv_lightning_cuda/blob/main/rwkv_lightning_api_doc.md
+# 采样与停止参数参照 RWKV-Agent 的 benchmark-protocol 与 samplingpreset。
+
+jobs_dir: jobs/rwkv
+n_attempts: 1
+timeout_multiplier: 1.5
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 1
+
+environment:
+  type: docker
+  force_build: false
+  delete: true
+
+agents:
+  - name: terminus-2
+    # 后端忽略 model 字段，这里只用于记录；openai/ 前缀让 LiteLLM 走 OpenAI 兼容协议
+    model_name: openai/rwkv7-g1k-7.2b-20260930-ctx25600
+    kwargs:
+      parser_name: json
+      temperature: 0.3
+      model_info:
+        max_tokens: 25600
+        max_input_tokens: 22000
+        max_output_tokens: 3000
+        input_cost_per_token: 0.0
+        output_cost_per_token: 0.0
+      llm_call_kwargs:
+        max_tokens: 3000
+        extra_body:
+          # agent-default 预设：top_k 不截断、top_p 0.5、关闭重复惩罚
+          top_k: 65536
+          top_p: 0.5
+          alpha_presence: 0.0
+          alpha_frequency: 0.0
+          alpha_decay: 1.0
+          # 不能用默认 stop_tokens [0,261,24281]：261 是 \n\n，会截断多行 JSON。
+          # 只用 [0] 也不行：模型答完不发 EOS，会续写下一轮 "User:" 直到 max_tokens。
+          # 所以改用字符串停止（与 stop_tokens 互斥，命中串会保留在输出末尾）。
+          stop: ["\n\nUser:", "\nUser:"]
+          think_type: fast
+
+datasets:
+  - path: harbor/examples/tasks
+    task_names: ["hello-world"]

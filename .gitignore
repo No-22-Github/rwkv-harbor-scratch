@@ -1,0 +1,13 @@
+# 外部仓库：由 scripts/setup.sh 按锁定提交拉取，不入库
+/harbor/
+/datasets/
+/third_party/
+
+# 跑分产物（体积大、含容器日志）；需要留档的结论写进 docs/
+/jobs/
+
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+/captures/

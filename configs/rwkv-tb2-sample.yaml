@@ -1,0 +1,52 @@
+# RWKV 续写后端 + terminus-2 跑 terminal-bench-sample@2.0 的 10 道题
+#
+# 题目取本地 datasets/terminal-bench-2（registry 锁定提交 69671fb），
+# 题单与 registry 里的 terminal-bench-sample@2.0 一致。
+#
+# 用法（在 RWKV-Harbor-Test 根目录）：
+#   export RWKV_API_BASE=http://<host>:8000/v1   # 可选 RWKV_API_KEY
+#   PYTHONPATH=. uv run --project harbor harbor run -c configs/rwkv-tb2-sample.yaml
+
+jobs_dir: jobs/rwkv-tb2-sample
+n_attempts: 1
+# 官方口径，不放宽超时
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  # Docker VM 只有 7.8 GB；qemu 题各要 4G
+  n_concurrent_trials: 3
+
+environment:
+  type: docker
+  force_build: false
+  delete: true
+
+agents:
+  - import_path: rwkv_harbor.agent:RwkvTerminus
+    model_name: rwkv/rwkv7-g1k-7.2b-20260930-ctx25600
+    kwargs:
+      parser_name: json
+      model_info:
+        max_tokens: 25600
+        max_input_tokens: 23000
+        max_output_tokens: 2048
+        input_cost_per_token: 0.0
+        output_cost_per_token: 0.0
+      llm_kwargs:
+        context_limit: 25600
+        max_output_tokens: 2048
+
+datasets:
+  - path: datasets/terminal-bench-2
+    task_names:
+      - build-cython-ext
+      - chess-best-move
+      - configure-git-webserver
+      - fix-code-vulnerability
+      - log-summary-date-ranges
+      - polyglot-c-py
+      - qemu-alpine-ssh
+      - qemu-startup
+      - regex-log
+      - sqlite-with-gcov

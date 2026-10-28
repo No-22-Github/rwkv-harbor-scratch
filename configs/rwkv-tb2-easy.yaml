@@ -1,0 +1,47 @@
+# RWKV 续写后端 + terminus-2 跑 terminal-bench 2.0 中标为 easy 的全部 4 道题
+#
+# 题目取本地 datasets/terminal-bench-2（registry 锁定提交 69671fb），
+# 题单与 registry 里的 terminal-bench-sample@2.0 一致。
+#
+# 用法（在 RWKV-Harbor-Test 根目录）：
+#   export RWKV_API_BASE=http://<host>:8000/v1   # 可选 RWKV_API_KEY
+#   PYTHONPATH=. uv run --project harbor harbor run -c configs/rwkv-tb2-easy.yaml
+
+jobs_dir: jobs/rwkv-tb2-easy
+n_attempts: 1
+# 官方口径，不放宽超时
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  # 4 题全部并发（内存上限合计 10G，实际占用远低于此）
+  n_concurrent_trials: 4
+
+environment:
+  type: docker
+  force_build: false
+  delete: true
+
+agents:
+  - import_path: rwkv_harbor.agent:RwkvTerminus
+    model_name: rwkv/rwkv7-g1k-7.2b-20260930-ctx25600
+    kwargs:
+      parser_name: json
+      model_info:
+        max_tokens: 25600
+        max_input_tokens: 23000
+        max_output_tokens: 1024
+        input_cost_per_token: 0.0
+        output_cost_per_token: 0.0
+      # 样例两轮中正常结束的 745 轮只有 13 轮超过 1024 token；撞上限的几乎都是 think 内复读
+      llm_kwargs:
+        context_limit: 25600
+        max_output_tokens: 1024
+
+datasets:
+  - path: datasets/terminal-bench-2
+    task_names:
+      - cobol-modernization
+      - fix-git
+      - overfull-hbox
+      - prove-plus-comm

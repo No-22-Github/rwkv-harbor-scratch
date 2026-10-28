@@ -1,0 +1,42 @@
+# RWKV 纯续写接口（/v1/batch/completions）+ terminus-2 跑 hello-world
+#
+# 与 rwkv-hello-world.yaml 的区别：不走服务端 chat 模板（会预填 <think></think），
+# 由 rwkv_harbor/llm.py 按 RWKV-Agent 的 g1 chat 模板自己拼 prompt。
+#
+# 用法（在 RWKV-Harbor-Test 根目录）：
+#   export RWKV_API_BASE=http://<host>:8000/v1   # 可选 RWKV_API_KEY
+#   PYTHONPATH=. uv run --project harbor harbor run -c configs/rwkv-continuation-hello-world.yaml
+
+jobs_dir: jobs/rwkv-continuation
+n_attempts: 1
+timeout_multiplier: 1.5
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 1
+
+environment:
+  type: docker
+  force_build: false
+  delete: true
+
+agents:
+  - import_path: rwkv_harbor.agent:RwkvTerminus
+    # 后端忽略 model 字段，只用于记录
+    model_name: rwkv/rwkv7-g1k-7.2b-20260930-ctx25600
+    kwargs:
+      parser_name: json
+      model_info:
+        max_tokens: 25600
+        max_input_tokens: 23000
+        max_output_tokens: 2048
+        input_cost_per_token: 0.0
+        output_cost_per_token: 0.0
+      llm_kwargs:
+        context_limit: 25600
+        max_output_tokens: 2048
+        # 采样默认用 RWKV-Agent 的 agent-default 预设，见 rwkv_harbor/llm.py
+
+datasets:
+  - path: harbor/examples/tasks
+    task_names: ["hello-world"]

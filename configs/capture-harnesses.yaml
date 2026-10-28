@@ -1,0 +1,134 @@
+# 抓取各内置 harness 发给模型的请求（系统提示词、工具定义）。
+# langgraph 不是现成 harness（需自带 langgraph.json 图定义），已排除。
+# 先启动 scripts/capture_proxy.py，再运行：
+#   OPENAI_API_KEY=dummy ANTHROPIC_API_KEY=dummy uv run --project harbor harbor run -c configs/capture-harnesses.yaml
+jobs_dir: jobs/capture-harnesses
+n_attempts: 1
+timeout_multiplier: 3.0
+orchestrator:
+  type: local
+  n_concurrent_trials: 4
+environment:
+  type: docker
+  force_build: false
+  delete: true
+agents:
+  - name: aider
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/aider/v1
+    model_api_format: openai_chat_completions
+  - name: code-puppy
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/code-puppy/v1
+    model_api_format: openai_chat_completions
+  - name: copilot-cli
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/copilot-cli/v1
+    model_api_format: openai_chat_completions
+  - name: deerflow
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/deerflow/v1
+    model_api_format: openai_chat_completions
+  - name: fx
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/fx/v1
+    model_api_format: openai_chat_completions
+  - name: fx-dev
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/fx-dev/v1
+    model_api_format: openai_chat_completions
+  - name: goose
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/goose/v1
+    model_api_format: openai_chat_completions
+  - name: grok-build
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/grok-build/v1
+    model_api_format: openai_chat_completions
+  - name: hermes
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/hermes/v1
+    model_api_format: openai_chat_completions
+  - name: kimi-cli
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/kimi-cli/v1
+    model_api_format: openai_chat_completions
+  - name: kimi-code
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/kimi-code/v1
+    model_api_format: openai_chat_completions
+  - name: mcode
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/mcode/v1
+    model_api_format: openai_chat_completions
+  - name: mimo
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/mimo/v1
+    model_api_format: openai_chat_completions
+  - name: mini-swe-agent
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/mini-swe-agent/v1
+    model_api_format: openai_chat_completions
+  - name: nemo-agent
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/nemo-agent/v1
+    model_api_format: openai_chat_completions
+  - name: opencode
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/opencode/v1
+    model_api_format: openai_chat_completions
+  - name: openhands
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/openhands/v1
+    model_api_format: openai_chat_completions
+  - name: openhands-sdk
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/openhands-sdk/v1
+    model_api_format: openai_chat_completions
+  - name: pi
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/pi/v1
+    model_api_format: openai_chat_completions
+  - name: qwen-coder
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/qwen-coder/v1
+    model_api_format: openai_chat_completions
+  - name: strands
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/strands/v1
+    model_api_format: openai_chat_completions
+  - name: swe-agent
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/swe-agent/v1
+    model_api_format: openai_chat_completions
+  - name: trae-agent
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/trae-agent/v1
+    model_api_format: openai_chat_completions
+  - name: vibe
+    model_name: openai/gpt-4o
+    base_url: http://host.docker.internal:8765/vibe/v1
+    model_api_format: openai_chat_completions
+  - name: codex
+    model_name: openai/gpt-5
+    base_url: http://host.docker.internal:8765/codex/v1
+    model_api_format: openai_responses
+  - name: muse-code
+    model_name: openai/gpt-5
+    base_url: http://host.docker.internal:8765/muse-code/v1
+    model_api_format: openai_responses
+  - name: claude-code
+    model_name: anthropic/claude-sonnet-4-5
+    base_url: http://host.docker.internal:8765/claude-code
+    model_api_format: anthropic_messages
+  - name: terminus-2
+    model_name: openai/gpt-4o
+    base_url: http://localhost:8765/terminus-2/v1
+    model_api_format: openai_chat_completions
+  - name: dspy-rlm
+    model_name: openai/gpt-4o
+    base_url: http://localhost:8765/dspy-rlm/v1
+    model_api_format: openai_chat_completions
+datasets:
+  - path: harbor/examples/tasks
+    task_names: ["hello-world"]
